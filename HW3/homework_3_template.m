@@ -1,6 +1,6 @@
  % Homework 3
 %% Problem 2a
-clear all; clc;
+clear; clc;
     dx = 0.1; 
     dy =0.1;
     sx = 10/dx; 
@@ -14,7 +14,8 @@ clear all; clc;
     N_o(:,:) = 0.75*carcap; % initialize N_o
     L = zeros(sy,sx);  % initialize lactate
     G = 2*ones(sy,sx);  % initialize glucose
-
+    chi_L = 0*G;
+    chi_G = 0*G;
     Dno = D; Dng = D;
     Dg = 5*D; Dl = D; 
     
@@ -35,16 +36,35 @@ clear all; clc;
     beta_L = 3.2;
     beta_o = 1.6;
     
+    %Plotting parameters
+    No = zeros(1,5/dt); Ng = No; Gtot = No; Ltot = No;
+    No(1) = sum(sum(N_o)); Ng(1) = sum(sum(N_g));
+    Gtot(1) = sum(sum(G)); Ltot(1) = sum(sum(L));
+    
     for t = 2:(5/dt)
-
-        % Put code here!
+        chi_G(G>Gmin) = 1; chi_G(G<Gmin) = 0; chi_G(G==Gmin) = 0;
+        chi_L = .5*(1+tanh(gamma*(L-Lstar)));
+        No_new = rd_fdm(N_o,Dno,[dx,dy],dt)+dt*(ko.*N_o.*(1-(N_o+N_g)/carcap)+...
+            kgo.*N_g.*chi_L-kog.*N_o.*(1-chi_L).*chi_G);
+        Ng_new = rd_fdm(N_g,Dng,[dx,dy],dt)+dt*(kg.*N_g.*(1-(N_o+N_g)/carcap)-...
+            kgo.*N_g.*chi_L+kog.*N_o.*(1-chi_L).*chi_G);
+        G_new = rd_fdm(G,Dg,[dx,dy],dt)+dt*(-beta_o*alpha_G.*G.*N_o./(alpha_G*G+...
+            alpha_L*L+Nstar)-beta_G.*G.*N_g./(G+Gstar));
+        L_new = rd_fdm(L,Dl,[dx,dy],dt)+dt*(-beta_L*alpha_L.*L.*N_o./(alpha_G*G+...
+            alpha_L*L+Mstar)+2*beta_G.*G.*N_g./(G+Gstar));    
         
-        % or Here!
+        N_o = No_new; N_g = Ng_new; G = G_new; L  = L_new;
         
-        
+        No(t) = sum(sum(N_o)); Ng(t) = sum(sum(N_g));
+        Gtot(t) = sum(sum(G)); Ltot(t) = sum(sum(L));
     end
+    figure(1)
+    plot(1:5/dt, No, 1:5/dt, Ng);
+    figure(2)
+    plot(1:5/dt, Gtot, 1:5/dt, Ltot);
+    
 %% Problem 2b
-clear all; clc;
+clear;
     dx = 0.1; 
     dy =0.1;
     sx = 10/dx; 
@@ -58,7 +78,8 @@ clear all; clc;
     N_o(:,:) = 0.75*carcap; % initialize N_o
     L = zeros(sy,sx);  % initialize lactate
     G = 2*ones(sy,sx);  % initialize glucose
-
+    chi_L = 0*G;
+    chi_G = 0*G;
     Dno = D; Dng = D;
     Dg = 5*D; Dl = D; 
     
@@ -78,14 +99,40 @@ clear all; clc;
     beta_G =1.15;
     beta_L = 3.2;
     beta_o = 1.6;
-    count = 0;
-    for t = 2:(5/dt)
     
-        % you know what to do
-        
+    %Plotting parameters
+    No = zeros(1,5/dt); Ng = No; Gtot = No; Ltot = No;
+    No(1) = sum(sum(N_o)); Ng(1) = sum(sum(N_g));
+    Gtot(1) = sum(sum(G)); Ltot(1) = sum(sum(L));
+    
+    for t1 = 1:5
+        for t = ((t1-1)/dt+2):(t1/dt+1)
+            chi_G(G>Gmin) = 1; chi_G(G<Gmin) = 0; chi_G(G==Gmin) = 0;
+            chi_L = .5*(1+tanh(gamma*(L-Lstar)));
+            No_new = rd_fdm(N_o,Dno,[dx,dy],dt)+dt*(ko.*N_o.*(1-(N_o+N_g)/carcap)+...
+                kgo.*N_g.*chi_L-kog.*N_o.*(1-chi_L).*chi_G);
+            Ng_new = rd_fdm(N_g,Dng,[dx,dy],dt)+dt*(kg.*N_g.*(1-(N_o+N_g)/carcap)-...
+                kgo.*N_g.*chi_L+kog.*N_o.*(1-chi_L).*chi_G);
+            G_new = rd_fdm(G,Dg,[dx,dy],dt)+dt*(-beta_o*alpha_G.*G.*N_o./(alpha_G*G+...
+                alpha_L*L+Nstar)-beta_G.*G.*N_g./(G+Gstar));
+            L_new = rd_fdm(L,Dl,[dx,dy],dt)+dt*(-beta_L*alpha_L.*L.*N_o./(alpha_G*G+...
+                alpha_L*L+Mstar)+2*beta_G.*G.*N_g./(G+Gstar));    
+            
+            N_o = No_new; N_g = Ng_new; G = G_new; L  = L_new;
+            
+            No(t) = sum(sum(N_o)); Ng(t) = sum(sum(N_g));
+            Gtot(t) = sum(sum(G)); Ltot(t) = sum(sum(L));
+        end
+        L = zeros(sy,sx);  % reinitialize lactate
+        G = ones(sy,sx);  % reinitialize glucose
     end
+    figure(1)
+    plot(1:5/dt+1, No, 1:5/dt+1, Ng);
+    figure(2)
+    plot(1:5/dt+1, Gtot, 1:5/dt+1, Ltot);
+    
 %% Problem 2c
-clear all; clc;
+clear;
     dx = 0.1; 
     dy =0.1;
     sx = 10/dx; 
@@ -99,7 +146,8 @@ clear all; clc;
     N_o(40:60,40:60) = 0.75*carcap; % initialize N_o
     L = zeros(sy,sx);  % initialize lactate
     G = 2*ones(sy,sx);  % initialize glucose
-
+    chi_L = 0*G;
+    chi_G = 0*G;
     Dno = D; Dng = D;
     Dg = 5*D; Dl = D; 
     
@@ -119,15 +167,35 @@ clear all; clc;
     beta_G =10;%1.15;
     beta_L = 3.2;
     beta_o = 1.6;
-    
+        
     for t = 2:(5/dt)
-     
-         % empty space for creativity
-         
+        chi_G(G>Gmin) = 1; chi_G(G<Gmin) = 0; chi_G(G==Gmin) = 0;
+        chi_L = .5*(1+tanh(gamma*(L-Lstar)));
+        No_new = rd_fdm(N_o,Dno,[dx,dy],dt)+dt*(ko.*N_o.*(1-(N_o+N_g)/carcap)+...
+            kgo.*N_g.*chi_L-kog.*N_o.*(1-chi_L).*chi_G);
+        Ng_new = rd_fdm(N_g,Dng,[dx,dy],dt)+dt*(kg.*N_g.*(1-(N_o+N_g)/carcap)-...
+            kgo.*N_g.*chi_L+kog.*N_o.*(1-chi_L).*chi_G);
+        G_new = rd_fdm(G,Dg,[dx,dy],dt)+dt*(-beta_o*alpha_G.*G.*N_o./(alpha_G*G+...
+            alpha_L*L+Nstar)-beta_G.*G.*N_g./(G+Gstar));
+        L_new = rd_fdm(L,Dl,[dx,dy],dt)+dt*(-beta_L*alpha_L.*L.*N_o./(alpha_G*G+...
+            alpha_L*L+Mstar)+2*beta_G.*G.*N_g./(G+Gstar));    
+        
+        N_o = No_new; N_g = Ng_new; G = G_new; L  = L_new;
+        
+        figure(1)
+        mesh(N_o(:,:));
+        zlim([0 1]);
+        drawnow
+        
+        figure(2)
+        mesh(N_g(:,:));
+        zlim([0 1]);
+        drawnow
     end
+    
 
 %% Problem 3a (1D optimization)
-clear all; clc;
+clear;
 load N_1d
 ktrue = k;
 Dtrue = D0;
