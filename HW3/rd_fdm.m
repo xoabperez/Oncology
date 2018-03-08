@@ -1,3 +1,6 @@
+% Finite difference method as usual, without any proliferation terms (those
+% are in the main file)
+
 function [Nout] = rd_fdm(N_in,D,dims,dt)
     [sy, sx] = size(N_in);
     Nout = zeros(sy,sx);
@@ -28,10 +31,10 @@ function [Nout] = rd_fdm(N_in,D,dims,dt)
                 diff_1y = (1/(2*dy))*(N_in(y+1,x)-N_in(y-1,x));
                 diff_Dy = (1/(2*dy))*(D(y+1,x)-D(y-1,x));
             end
-            
-            
-            diffusion = D(y,x)*(diff_y+diff_x)+diff_Dx*diff_1x+diff_Dy*diff_1y;
-            Nout(y,x) = N_in(y,x) +dt*(diffusion);%+k(y,x)*N_in(y,x)*(1-N_in(y,x)/carcap)) ;  
+                        
+            diffusion = D(y,x)*(diff_y+diff_x)+diff_Dx*diff_1x+...
+                diff_Dy*diff_1y;
+            Nout(y,x) = N_in(y,x) +dt*(diffusion);
         end
     end
 

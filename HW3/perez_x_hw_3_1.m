@@ -47,7 +47,8 @@ for t = 2:(5/dt)
     chi_G(G>Gmin) = 1; chi_G(G<Gmin) = 0; chi_G(G==Gmin) = 0;
     chi_L = .5*(1+tanh(gamma*(L-Lstar)));
     
-    % Run finite difference for new state of cells and glucose/lactate
+    % Run finite difference for new state of cells and glucose/lactate;
+    % include proliferation here since it's more complicated
     No_new = rd_fdm(N_o,Dno,[dx,dy],dt)+dt*(ko.*N_o.*(1-(N_o+N_g)/carcap)...
         +kgo.*N_g.*chi_L-kog.*N_o.*(1-chi_L).*chi_G);
     Ng_new = rd_fdm(N_g,Dng,[dx,dy],dt)+dt*(kg.*N_g.*(1-(N_o+N_g)/carcap)...
