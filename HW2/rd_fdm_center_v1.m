@@ -1,16 +1,19 @@
-% Finite difference method as usual, without any proliferation terms (those
-% are in the main file)
-
-function [Nout] = rd_fdm(N_in,D,dims,dt,steps)
-
-for s = 1:steps
+function [Nout] = rd_fdm_center_v1(N_in,D,k,carcap,dims,dt)
+% N_in = # of tumor cells 
+% D = diffusion coefficient
+% k = proliferation rate
+% carcap = carrying capacity
+% dims = dimension of voxels
+% dt = time step
     [sy, sx] = size(N_in);
     Nout = zeros(sy,sx);
     dx = dims(1);
     dy = dims(2);
-   
-    for x = 1:sx
-        for y = 1:sy
+    
+    
+    for x = 1:sx  %sx = size in the x-direction
+        for y = 1:sy % sy = size in the y-direction
+            % evaluate boundary conditions
             if x == 1
                 diff_x = (-2*N_in(y,x)+2*N_in(y,x+1))/(dx^2);
                 diff_1x = 0; diff_Dx = 0;
@@ -33,12 +36,16 @@ for s = 1:steps
                 diff_1y = (1/(2*dy))*(N_in(y+1,x)-N_in(y-1,x));
                 diff_Dy = (1/(2*dy))*(D(y+1,x)-D(y-1,x));
             end
-                        
-            diffusion = D(y,x)*(diff_y+diff_x)+diff_Dx*diff_1x+...
-                diff_Dy*diff_1y;
-            Nout(y,x) = N_in(y,x) +dt*(diffusion);
+            
+            
+            diffusion = D(y,x)*(diff_y+diff_x)+diff_Dx*diff_1x+diff_Dy*diff_1y;
+            Nout(y,x) = N_in(y,x) +dt*(diffusion+k(y,x)*N_in(y,x)*(1-N_in(y,x)/carcap)) ;  
         end
     end
-end
+
+
+
+
+
 
 end

@@ -1,7 +1,8 @@
 %lecture_2_ic.m 
 % in-class 1D example
-clear all; close all
- clc;x = 0:0.1:1;
+clear all; close all; clc;
+
+x = 0:0.1:1;
 exampleF = @(x,p) (x-p(1)).*p(2)+(x).^2*p(3);
 ptrue = [10 2 3];
 N_true = exampleF(x,ptrue)+random('Normal',0,.1,[1 11]);
